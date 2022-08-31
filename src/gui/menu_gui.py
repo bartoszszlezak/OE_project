@@ -1,22 +1,24 @@
 from tkinter import *
 from PIL import ImageTk, Image
 import time
+
+from matplotlib import pyplot as plt
+
 from src.plot import plot
 from src.configuration import *
 from src.generic_algorithm.algorithm.algorithm import run_algorithm
 
+
 class MyWindow:
     def __init__(self, win):
-
-
-        #Background
+        # Background
         self.image = Image.open("src/gui/oe5.jpg")
         self.img = self.image.resize((500, 800))
         self.bg = ImageTk.PhotoImage(self.img)
         self.label_bg = Label(win, image=self.bg)
         self.label_bg.place(x=0, y=0)
 
-        #Colours
+        # Colours
         label_fg_color = "black"
         label_bg_color = "white"
 
@@ -26,10 +28,7 @@ class MyWindow:
         dropBox_fg_color = "black"
         dropBox_bg_color = "white"
 
-
-
-
-        #Labels
+        # Labels
 
         self.lbl1 = Label(win, text='Start: ')
         self.lbl2 = Label(win, text='End: ')
@@ -46,6 +45,8 @@ class MyWindow:
         self.lbl13 = Label(win, text='Inversion probability: ')
         self.lbl14 = Label(win, text='Elite percent: ')
         self.lbl15 = Label(win, text='Algorithm goal: ')
+        self.lbl16 = Label(win, text='Alpha: ')
+        self.lbl17 = Label(win, text='Beta: ')
 
         self.lbl1.place(x=100, y=40)
         self.lbl2.place(x=100, y=80)
@@ -62,7 +63,8 @@ class MyWindow:
         self.lbl13.place(x=100, y=520)
         self.lbl14.place(x=100, y=560)
         self.lbl15.place(x=100, y=600)
-
+        self.lbl16.place(x=100, y=640)
+        self.lbl17.place(x=100, y=680)
 
         self.lbl1.configure(foreground=label_fg_color, background=label_bg_color)
         self.lbl2.configure(foreground=label_fg_color, background=label_bg_color)
@@ -78,12 +80,10 @@ class MyWindow:
         self.lbl12.configure(foreground=label_fg_color, background=label_bg_color)
         self.lbl13.configure(foreground=label_fg_color, background=label_bg_color)
 
-
-
-        #Inputs
-        self.start=Entry(bd=3)
-        self.end=Entry()
-        self.prec=Entry()
+        # Inputs
+        self.start = Entry(bd=3)
+        self.end = Entry()
+        self.prec = Entry()
         self.pop_size = Entry()
         self.epchs_num = Entry()
         self.sel_perc = Entry()
@@ -92,8 +92,8 @@ class MyWindow:
         self.mut_prob = Entry()
         self.inv_prob = Entry()
         self.elite_percent = Entry()
-
-
+        self.alpha = Entry()
+        self.beta = Entry()
 
         self.start.configure(foreground=input_fg_color, background=input_bg_color)
         self.end.configure(foreground=input_fg_color, background=input_bg_color)
@@ -106,6 +106,8 @@ class MyWindow:
         self.mut_prob.configure(foreground=input_fg_color, background=input_bg_color)
         self.inv_prob.configure(foreground=input_fg_color, background=input_bg_color)
         self.elite_percent.configure(foreground=input_fg_color, background=input_bg_color)
+        self.alpha.configure(foreground=input_fg_color, background=input_bg_color)
+        self.beta.configure(foreground=input_fg_color, background=input_bg_color)
 
         self.start.place(x=250, y=40, w=50)
         self.end.place(x=250, y=80, w=50)
@@ -118,10 +120,12 @@ class MyWindow:
         self.mut_prob.place(x=250, y=480, w=50)
         self.inv_prob.place(x=250, y=520, w=50)
         self.elite_percent.place(x=250, y=560, w=50)
+        self.alpha.place(x=250, y=640, w=50)
+        self.beta.place(x=250, y=680, w=50)
 
-        #Dropbox
+        # Dropbox
 
-        #Options
+        # Options
         self.optionsSelection = [
             "SELECTION_BEST",
             "SELECTION_TOURNAMENT",
@@ -130,13 +134,19 @@ class MyWindow:
         self.optionsCrossover = [
             "CROSSOVER_HOMOGENOUS",
             "CROSSOVER_SINGLE_POINT",
-            "CROSSOVER_DOUBLE_POINT"
-
+            "CROSSOVER_DOUBLE_POINT",
+            "ARITHMETIC_CROSSOVER",
+            "LINEAR_CROSSOVER",
+            "BLEND_CROSSOVER_ALPHA",
+            "BLEND_CROSSOVER_ALPHA_BETA",
+            "AVERAGE_CROSSOVER"
         ]
         self.optionsMutation = [
             "MUTATION_BOUNDARY",
             "MUTATION_SINGLE_POINT",
-            "MUTATION_DOUBLE_POINT"
+            "MUTATION_DOUBLE_POINT",
+            "UNIFORM_MUTATION",
+            "GAUSSIAN_MUTATION"
         ]
 
         self.optionsMinMax = [
@@ -144,42 +154,35 @@ class MyWindow:
             "MINIMUM",
         ]
 
-        #SelectedOptions
+        # SelectedOptions
         self.selectedSelection = StringVar()
         self.selectedCrossover = StringVar()
         self.selectedMutation = StringVar()
         self.selectedGoal = StringVar()
 
-
-
         self.dropBox1 = OptionMenu(win, self.selectedSelection, *self.optionsSelection)
         self.dropBox1.place(x=250, y=240, w=200)
-        self.dropBox1.configure(foreground=dropBox_fg_color, background=dropBox_bg_color )
+        self.dropBox1.configure(foreground=dropBox_fg_color, background=dropBox_bg_color)
 
         self.dropBox2 = OptionMenu(win, self.selectedCrossover, *self.optionsCrossover)
         self.dropBox2.place(x=250, y=360, w=200)
-        self.dropBox2.configure(foreground=dropBox_fg_color, background=dropBox_bg_color )
-
+        self.dropBox2.configure(foreground=dropBox_fg_color, background=dropBox_bg_color)
 
         self.dropBox3 = OptionMenu(win, self.selectedMutation, *self.optionsMutation)
         self.dropBox3.place(x=250, y=440, w=200)
-        self.dropBox3.configure(foreground=dropBox_fg_color, background=dropBox_bg_color )
-
+        self.dropBox3.configure(foreground=dropBox_fg_color, background=dropBox_bg_color)
 
         self.dropBox4 = OptionMenu(win, self.selectedGoal, *self.optionsMinMax)
         self.dropBox4.place(x=250, y=600, w=200)
-        self.dropBox4.configure(foreground=dropBox_fg_color, background=dropBox_bg_color )
+        self.dropBox4.configure(foreground=dropBox_fg_color, background=dropBox_bg_color)
 
-
-
-        self.b1=Button(win, text='Calculate', command = lambda:self.calculate(win))
-        self.b1.place(x=200, y=725,w=100,h=50)
+        self.b1 = Button(win, text='Calculate', command=lambda: self.calculate(win))
+        self.b1.place(x=200, y=725, w=100, h=50)
 
     def configure(self):
-
         conf = Config()
 
-        conf.start = int(self.start.get()) if self.start.get() else  START
+        conf.start = int(self.start.get()) if self.start.get() else START
         conf.end = int(self.end.get()) if self.end.get() else END
         conf.precision = int(self.prec.get()) if self.prec.get() else PRECISION
         conf.pop_size = int(self.pop_size.get()) if self.pop_size.get() else POPULATION_SIZE
@@ -194,14 +197,12 @@ class MyWindow:
         conf.inversion_probability = float(self.inv_prob.get()) if self.inv_prob.get() else INVERSION_PROB
         conf.elite_percent = float(self.elite_percent.get()) if self.elite_percent.get() else ELITE_PERCENT
         conf.algorithm_goal = self.selectedGoal.get() or MINIMUM
+        conf.alpha = float(self.alpha.get()) or ALPHA
+        conf.beta = float(self.beta.get()) or BETA
 
         return conf
 
-
-
-    def calculate(self,win):
-
-
+    def calculate(self, win):
         conf = self.configure()
 
         start = time.time()
@@ -217,29 +218,24 @@ class MyWindow:
         plt.title("Odchylenie standardowe w kolejnej iteracji")
         plot(result_standard_deviation)
 
-
         results = {
-            "x1": round(result_fitness[len(result_fitness) - 1][0],2) ,
-            "x2": round(result_fitness[len(result_fitness) - 1][1],2),
-            "y": round(result_fitness[len(result_fitness) - 1][2],2),
+            "x1": round(result_fitness[len(result_fitness) - 1][0], 2),
+            "x2": round(result_fitness[len(result_fitness) - 1][1], 2),
+            "y": round(result_fitness[len(result_fitness) - 1][2], 2),
+
         }
-
-
 
         timer = end - start
 
+        self.openNewWindow(win, timer, results)
 
-        self.openNewWindow(win,timer,results)
-
-
-    def openNewWindow(self,win,timer,results):
+    def openNewWindow(self, win, timer, results):
         newWindow = Toplevel(win)
         newWindow.title("Wyniki")
         newWindow.geometry("200x75")
-        t = "Solution was found in: " + str(round(timer,3)) + " s"
+        t = "Solution was found in: " + str(round(timer, 3)) + " s"
         Label(newWindow,
               text=t).pack()
         Label(newWindow,
               text=f"Ekstremum: f({results['x1']},{results['x2']}) = {results['y']}").pack()
-
 

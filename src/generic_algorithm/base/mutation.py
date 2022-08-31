@@ -1,4 +1,9 @@
 import random
+import numpy as np
+
+from src.configuration import MUTATION_PROB
+from src.generic_algorithm.models.chromosome import Chromosome
+from src.generic_algorithm.models.individual import Individual
 
 
 class Mutation:
@@ -33,3 +38,31 @@ class Mutation:
                     individual.chromosomes[j].bin_chrom[i] = 1 - individual.chromosomes[j].bin_chrom[i]
 
         individual.update_fitness()
+
+    def uniform_mutation(self, individual, start, end, precision):
+
+        if random.random() > MUTATION_PROB:
+            return individual
+
+        return Individual(chromosomes=[individual.chromosomes[random.randint(0, 1)], Chromosome(start, end, precision)])
+
+    def gaussian_mutation(self, individual, start, end):
+
+        if random.random() > MUTATION_PROB:
+            return individual
+
+        x = individual.chromosomes[0].representation
+        y = individual.chromosomes[1].representation
+        sigma = abs(end - start) / 10
+        z = np.random.normal(0, sigma)
+        new_x = x + z
+        if new_x < start:
+            new_x = start
+        if new_x > end:
+            new_x = end
+        new_y = y + z
+        if new_y < start:
+            new_y = start
+        if new_y > end:
+            new_y = end
+        return Individual(chromosomes=[Chromosome(representation=new_x), Chromosome(representation=new_y)])

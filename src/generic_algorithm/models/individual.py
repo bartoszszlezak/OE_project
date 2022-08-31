@@ -2,13 +2,13 @@ from src.generic_algorithm.models.chromosome import Chromosome
 
 
 class Individual:
-    def __init__(self, start, end, precision):
-        self.chromosomes = [Chromosome(start, end, precision) for _ in range(2)]
+    def __init__(self, start = None, end = None, precision = None, chromosomes = None):
+        self.chromosomes = [Chromosome(start, end, precision) for _ in range(2)] if chromosomes is None else chromosomes
         self.fitness = self.get_fitness()
 
     def get_fitness(self):
-        x1 = self.chromosomes[0].decode_binary_chain()
-        x2 = self.chromosomes[1].decode_binary_chain()
+        x1 = self.chromosomes[0].representation
+        x2 = self.chromosomes[1].representation
         return self.booth_function(x1, x2)
 
     def update_fitness(self):

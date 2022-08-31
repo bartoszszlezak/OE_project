@@ -14,7 +14,8 @@ class AlgorithmFacade:
     def __init__(self, config: Config):
         self.config = config
         self.selection_helper = Selection(self.ind_comparator)
-        self.crossover_helper = Crossover()
+        self.crossover_helper = Crossover(self.ind_comparator, self.config.alpha, self.config.beta,
+                                          self.config.start, self.config.end)
         self.mutation_helper = Mutation()
         self.inversion_helper = Inversion()
 
@@ -46,6 +47,21 @@ class AlgorithmFacade:
         if self.config.crossover_type == CROSSOVER_DOUBLE_POINT:
             return self.crossover_helper.double_point_crossover(population[index_1], population[index_2])
 
+        if self.config.crossover_type == ARITHMETIC_CROSSOVER:
+            return self.crossover_helper.arithmetic_crossover(population[index_1], population[index_2])
+
+        if self.config.crossover_type == LINEAR_CROSSOVER:
+            return self.crossover_helper.linear_crossover(population[index_1], population[index_2])
+
+        if self.config.crossover_type == BLEND_CROSSOVER_ALPHA:
+            return self.crossover_helper.blend_crossover_alpha(population[index_1], population[index_2])
+
+        if self.config.crossover_type == BLEND_CROSSOVER_ALPHA_BETA:
+            return self.crossover_helper.blend_crossover_alpha_beta(population[index_1], population[index_2])
+
+        if self.config.crossover_type == AVERAGE_CROSSOVER:
+            return self.crossover_helper.average_crossover(population[index_1], population[index_2])
+
     def mutation(self, population, index):
 
         if self.config.mutation_type == MUTATION_BOUNDARY:
@@ -58,6 +74,13 @@ class AlgorithmFacade:
 
         if self.config.mutation_type == MUTATION_DOUBLE_POINT:
             self.mutation_helper.double_point_mutation(self.config.mutation_probability, population[index])
+
+        if self.config.mutation_type == UNIFORM_MUTATION:
+            return self.mutation_helper.uniform_mutation(population[index], self.config.start,
+                                                  self.config.end, self.config.precision)
+
+        if self.config.mutation_type == GAUSSIAN_MUTATION:
+            return self.mutation_helper.gaussian_mutation(population[index], self.config.start, self.config.end)
 
     def invert(self, individual):
         self.inversion_helper.invert(individual, self.config.inversion_probability)
@@ -77,7 +100,10 @@ class AlgorithmFacade:
         elif self.config.algorithm_goal == MINIMUM:
             direction = -1
 
-        return direction * int(math.fabs(ind_2.fitness) - math.fabs(ind_1.fitness))
+        try:
+            return direction * int(math.fabs(ind_2.fitness) - math.fabs(ind_1.fitness))
+        except:
+            return None
 
     def get_sorted_pop(self, pop):
         return sorted(pop, key=cmp_to_key(self.ind_comparator))
